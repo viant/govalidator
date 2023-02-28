@@ -1,6 +1,8 @@
 package govalidator
 
-import "context"
+import (
+	"context"
+)
 
 //IsValid represents a validation function
 type IsValid func(ctx context.Context, value interface{}) (bool, error)
