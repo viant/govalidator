@@ -240,7 +240,10 @@ func isEmpty(value interface{}) bool {
 	case *uint8:
 		return actual == nil
 	case *string:
-		return actual == nil || *actual == ""
+		if actual == nil {
+			return true
+		}
+		return *actual == ""
 	case string:
 		return actual == ""
 	default:
