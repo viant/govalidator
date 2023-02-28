@@ -87,8 +87,13 @@ func TestService_Validate(t *testing.T) {
 		},
 		{
 			description:  "repeated ptr validation",
-			input:        []*BasicRecord{{ID: 1, Phone: "213-300-0875"}, {ID: 1, Phone: "213-300-08752"}, {ID: 1, Email: "aaa"}},
+			input:        []*BasicRecord{{ID: 1, Phone: "213-300-2222"}, {ID: 1, Phone: "213-300-22222"}, {ID: 1, Email: "aaa"}},
 			expectFailed: true,
+		},
+		{
+			description:  "valid phone",
+			input:        &BasicRecord{ID: 1, Phone: "213-300-2222"},
+			expectFailed: false,
 		},
 		{
 			description:  "repeated ptr validation",
@@ -142,7 +147,7 @@ func TestService_Validate(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases[len(testCases)-1:] {
+	for _, testCase := range testCases {
 		srv := New()
 		validation, err := srv.Validate(context.Background(), testCase.input, testCase.options...)
 		if !assert.Nil(t, err, testCase.description) {
