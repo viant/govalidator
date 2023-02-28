@@ -4,6 +4,7 @@ type (
 	Options struct {
 		PresenceProvider *PresenceProvider
 		Shallow          bool
+		Path             *Path
 	}
 	Option func(c *Options)
 )
@@ -12,6 +13,13 @@ type (
 func WithPresence() Option {
 	return func(c *Options) {
 		c.PresenceProvider = &PresenceProvider{}
+	}
+}
+
+//WithPath creates with path option
+func WithPath(path *Path) Option {
+	return func(c *Options) {
+		c.Path = path
 	}
 }
 

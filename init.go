@@ -65,5 +65,9 @@ func init() {
 	Register("jWT", NewRegExprCheck(jWTRegex))
 	Register("bic", NewRegExprCheck(bicRegex))
 	Register("dnsRegexRFC1035Label", NewRegExprCheck(dnsRegexRFC1035Label))
+
+	Register("ge", NewGt())
+	Register("gte", NewGte())
+
 	RegisterAlias("phone", "e164", "localPhone")
 }

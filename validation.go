@@ -37,6 +37,10 @@ func (v *Validation) Append(path *Path, field string, value interface{}, check s
 	})
 }
 
+func (e *Validation) Error() string {
+	return e.String()
+}
+
 func (e *Validation) String() string {
 	if e == nil || len(e.Violations) == 0 {
 		return ""
@@ -51,6 +55,7 @@ func (e *Validation) String() string {
 	}
 	return msg.String()
 }
+
 func derefIfNeeded(value interface{}) interface{} {
 	switch actual := value.(type) {
 	case *string:
@@ -65,7 +70,6 @@ func derefIfNeeded(value interface{}) interface{} {
 		if actual == nil {
 			return nil
 		}
-
 	}
 	if value == nil {
 		return nil

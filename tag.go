@@ -25,7 +25,7 @@ type (
 //ParseTag parses rule
 func ParseTag(tagString string) *Tag {
 	tag := &Tag{}
-	elements := strings.Split(tagString, "|")
+	elements := strings.Split(tagString, ",")
 	if len(elements) == 0 {
 		return nil
 	}
@@ -34,22 +34,22 @@ func ParseTag(tagString string) *Tag {
 	tag.SkipPath = strings.Contains(strings.ToLower(tagString), "skippath")
 	tag.Presence = strings.Contains(strings.ToLower(tagString), "presence")
 
-	for _, checkElement := range elements {
+	for _, element := range elements {
 		check := Check{}
-		checkSpec := strings.Split(checkElement, ";")
-		for _, checkSpecElem := range checkSpec {
-			pair := strings.Split(checkSpecElem, "=")
-			switch len(checkSpec) {
-			case 2:
-				switch strings.ToLower(strings.TrimSpace(pair[0])) {
-				case "message":
-					check.Message = strings.TrimSpace(pair[1])
-				case "name":
-					check.Name, check.Parameters = extractNameWithParams(strings.TrimSpace(pair[1]))
-				}
-			case 1:
-				check.Name, check.Parameters = extractNameWithParams(strings.TrimSpace(checkSpecElem))
+		pair := strings.Split(element, "=")
+		switch len(pair) {
+		case 2:
+			switch strings.ToLower(strings.TrimSpace(pair[0])) {
+			case "message":
+				check.Message = strings.TrimSpace(pair[1])
+			case "name":
+				check.Name, check.Parameters = extractNameWithParams(strings.TrimSpace(pair[1]))
+			default:
+				check.Name = pair[0]
+				check.Parameters = pair[1:]
 			}
+		case 1:
+			check.Name, check.Parameters = extractNameWithParams(strings.TrimSpace(element))
 		}
 		switch strings.ToLower(check.Name) {
 		case "omitempty", "skippath", "presence":

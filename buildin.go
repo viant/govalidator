@@ -7,7 +7,7 @@ import (
 	"reflect"
 )
 
-type IsZero interface {
+type Zeroable interface {
 	IsZero() bool
 }
 
@@ -30,7 +30,7 @@ func checkRequiredSlice(ctx context.Context, value interface{}) (bool, error) {
 }
 
 func checkRequiredZeroStruct(ctx context.Context, value interface{}) (bool, error) {
-	zeroer, ok := value.(IsZero)
+	zeroer, ok := value.(Zeroable)
 	if !ok {
 		return false, fmt.Errorf("expected: %T, but had: %T", zeroer, value)
 	}
@@ -42,9 +42,9 @@ func newRequiredCheck(field *Field, check *Check) (IsValid, error) {
 	case reflect.Ptr:
 		return checkRequiredPtr, nil
 	case reflect.Struct:
-		_, ok := field.Type.MethodByName("IsZero")
+		_, ok := field.Type.MethodByName("Zeroable")
 		if !ok {
-			return nil, fmt.Errorf("struct does not implemt IsZero for required check: %v", field.Type.String())
+			return nil, fmt.Errorf("struct does not implemt Zeroable for required check: %v", field.Type.String())
 		}
 		return checkRequiredZeroStruct, nil
 	case reflect.String:

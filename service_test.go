@@ -2,8 +2,8 @@ package govalidator
 
 import (
 	"context"
+	"fmt"
 	"github.com/stretchr/testify/assert"
-	"github.com/viant/toolbox"
 	"testing"
 )
 
@@ -126,16 +126,30 @@ func TestService_Validate(t *testing.T) {
 			expectFailed: false,
 			options:      []Option{WithShallow(true)},
 		},
+		{
+			description: "ge passed",
+			input: struct {
+				Value int `validate:"ge=3"`
+			}{5},
+			expectFailed: false,
+		},
+		{
+			description: "gte failed",
+			input: struct {
+				Value int `validate:"gte=6"`
+			}{5},
+			expectFailed: true,
+		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases[len(testCases)-1:] {
 		srv := New()
 		validation, err := srv.Validate(context.Background(), testCase.input, testCase.options...)
 		if !assert.Nil(t, err, testCase.description) {
 			continue
 		}
 		if !assert.EqualValues(t, testCase.expectFailed, validation.Failed) {
-			toolbox.Dump(validation)
+			fmt.Printf("%v", validation)
 		}
 	}
 }

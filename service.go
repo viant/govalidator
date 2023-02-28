@@ -53,11 +53,22 @@ func (s *Service) validate(ctx context.Context, any interface{}, validation *Val
 }
 
 func deref(any interface{}) interface{} {
+	if any == nil {
+		return nil
+	}
+	if zeroer, ok := any.(Zeroable); ok {
+		if zeroer.IsZero() {
+			return nil
+		}
+	}
 	any = reflect.ValueOf(any).Elem().Interface()
 	return any
 }
 
 func (s *Service) validateStruct(ctx context.Context, t reflect.Type, value interface{}, validation *Validation, options *Options) error {
+	if value == nil {
+		return nil
+	}
 	session := ctx.Value(SessionKey).(*Session)
 	ptr := xunsafe.AsPointer(value)
 	checks, err := s.checksFor(t, options.PresenceProvider)
@@ -236,7 +247,7 @@ func isEmpty(value interface{}) bool {
 		if value == nil {
 			return true
 		}
-		if zeroer, ok := value.(IsZero); ok {
+		if zeroer, ok := value.(Zeroable); ok {
 			return zeroer.IsZero()
 		}
 		return value == nil

@@ -92,6 +92,8 @@ validation, err := validator.Validate(someStruct)
 - jwt
 - bic
 - dnsregexrfc1035label
+- gt(N)
+- gte(N)
 
 
 ### Additional tag

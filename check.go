@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/viant/xunsafe"
 	"reflect"
+	"time"
 )
 
 type (
@@ -32,8 +33,6 @@ type (
 	}
 )
 
-var a = 1
-
 //NewChecks returns new checks
 func NewChecks(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
 	checks := &Checks{Type: t, presence: presence}
@@ -48,11 +47,16 @@ func NewChecks(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
 		fieldPos[xField.Name] = i
 		tagLiteral, ok := xField.Tag.Lookup("validate")
 		tag := ParseTag(tagLiteral)
+		if !tag.Presence {
+			if _, ok := xField.Tag.Lookup("presenceIndex"); ok {
+				tag.Presence = ok
+			}
+		}
 		if presence != nil && tag.Presence {
 			presence.Holder = xField
 		}
 
-		if isStruct(xField.Type) {
+		if isStruct(xField.Type) && !isTime(xField.Type) {
 			checks.Structs = append(checks.Structs, &Field{Tag: tag, Field: xField})
 		} else if isSliceStruct(xField.Type) {
 			checks.Slices = append(checks.Slices, &Field{Tag: tag, Field: xField})
@@ -104,4 +108,11 @@ func isStruct(t reflect.Type) bool {
 		return isStruct(t.Elem())
 	}
 	return false
+}
+
+func isTime(t reflect.Type) bool {
+	if t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return t == reflect.TypeOf(time.Time{})
 }
