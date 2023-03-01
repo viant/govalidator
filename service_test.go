@@ -148,14 +148,13 @@ func TestService_Validate(t *testing.T) {
 		{
 			description: "phone valid ptr",
 			input: struct {
-				ID    int
 				Phone *string `validate:"omitempty,phone"`
 			}{Phone: stringPtr("213-222-0001")},
 			expectFailed: false,
 		},
 	}
 
-	for _, testCase := range testCases[len(testCases)-1:] {
+	for _, testCase := range testCases {
 		srv := New()
 		validation, err := srv.Validate(context.Background(), testCase.input, testCase.options...)
 		if !assert.Nil(t, err, testCase.description) {

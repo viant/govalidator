@@ -61,6 +61,11 @@ func deref(any interface{}) interface{} {
 			return nil
 		}
 	}
+	ptr := xunsafe.AsPointer(any)
+	derefPtr := xunsafe.DerefPointer(ptr)
+	if derefPtr == nil {
+		return nil
+	}
 	any = reflect.ValueOf(any).Elem().Interface()
 	return any
 }
