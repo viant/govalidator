@@ -84,6 +84,12 @@ const (
 	jWTRegexPattern                 = "^[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]*$"
 	bicRegexPattern                 = `^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$`
 	dnsRegexPatternRFC1035Label     = "^[a-z]([-a-z0-9]*[a-z0-9]){0,62}$"
+
+	iabCategoryPattern = "(\\AIAB[0-9]{1,2}\\z)|(\\AIAB[0-9]{1,2}-[0-9]{1,2}\\z)"
+
+	domainPattern = "(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]"
+
+	worldWideWebDomainPattern = "www\\d?\\." + domainPattern
 )
 
 var (
@@ -142,4 +148,7 @@ var (
 	jWTRegex                 = regexp.MustCompile(jWTRegexPattern)
 	bicRegex                 = regexp.MustCompile(bicRegexPattern)
 	dnsRegexRFC1035Label     = regexp.MustCompile(dnsRegexPatternRFC1035Label)
+	iabCategory              = regexp.MustCompile(iabCategoryPattern)
+	domain                   = regexp.MustCompile(domainPattern)
+	worldWideWebDomain       = regexp.MustCompile(worldWideWebDomainPattern)
 )

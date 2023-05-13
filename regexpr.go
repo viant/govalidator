@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 type RegExprCheck struct {
@@ -44,6 +45,23 @@ func (r *RegExprCheck) IsValidString(ctx context.Context, value interface{}) (bo
 	return r.expr.MatchString(actual), nil
 }
 
+func NewNotRegExprCheck(expr *regexp.Regexp) func(field *Field, check *Check) (IsValid, error) {
+	fn := NewRegExprCheck(expr)
+	return func(field *Field, check *Check) (IsValid, error) {
+		isValid, err := fn(field, check)
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context, value interface{}) (bool, error) {
+			ret, err := isValid(ctx, value)
+			if err != nil {
+				return false, err
+			}
+			return !ret, nil
+		}, nil
+	}
+}
+
 //NewRegExprCheck creates a regexpr based validation check
 func NewRegExprCheck(expr *regexp.Regexp) func(field *Field, check *Check) (IsValid, error) {
 	ret := &RegExprCheck{expr: expr}
@@ -57,6 +75,40 @@ func NewRegExprCheck(expr *regexp.Regexp) func(field *Field, check *Check) (IsVa
 			}
 		}
 		return nil, fmt.Errorf("unsupported regexpr based %v check type: %s", field.Tag, field.Type.String())
+	}
+}
+
+func NewRepeatedRegExprCheck(expr *regexp.Regexp, separator string) func(field *Field, check *Check) (IsValid, error) {
+	fn := NewRegExprCheck(expr)
+	return func(field *Field, check *Check) (IsValid, error) {
+		isValid, err := fn(field, check)
+		if err != nil {
+			return nil, err
+		}
+		return func(ctx context.Context, value interface{}) (bool, error) {
+			fragment := ""
+			switch actual := value.(type) {
+			case string:
+				fragment = actual
+			case []byte:
+				fragment = string(actual)
+			default:
+				return false, fmt.Errorf("invalid input type: expected: %T, but had: %T", fragment, value)
+			}
+			if len(fragment) == 0 {
+				return false, nil
+			}
+			for _, item := range strings.Split(fragment, separator) {
+				ret, err := isValid(ctx, item)
+				if err != nil {
+					return false, err
+				}
+				if !ret {
+					return false, nil
+				}
+			}
+			return true, nil
+		}, nil
 	}
 }
 

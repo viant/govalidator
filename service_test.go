@@ -152,6 +152,114 @@ func TestService_Validate(t *testing.T) {
 			}{Phone: stringPtr("213-222-0001")},
 			expectFailed: false,
 		},
+
+		{
+			description: "valid domain",
+			input: struct {
+				Phone *string `validate:"omitempty,domain"`
+			}{Phone: stringPtr("wp.pl")},
+			expectFailed: false,
+		},
+		{
+			description: "invalid domain",
+			input: struct {
+				Phone *string `validate:"omitempty,domain"`
+			}{Phone: stringPtr("wp-.pl")},
+			expectFailed: true,
+		},
+		{
+			description: "valid www domain",
+			input: struct {
+				Value *string `validate:"omitempty,wwwDomain"`
+			}{Value: stringPtr("www.wp.pl")},
+			expectFailed: false,
+		},
+		{
+			description: "invalid www domain",
+			input: struct {
+				Value *string `validate:"omitempty,wwwDomain"`
+			}{Value: stringPtr("lll.wp.pl")},
+			expectFailed: true,
+		},
+
+		{
+			description: "valid top level domain",
+			input: struct {
+				Value *string `validate:"omitempty,domain,notWWWDomain"`
+			}{Value: stringPtr("lll.wp.pl")},
+			expectFailed: false,
+		},
+		{
+			description: "invalid top level domain",
+			input: struct {
+				Value *string `validate:"omitempty,domain,notWWWDomain"`
+			}{Value: stringPtr("www.wp.pl")},
+			expectFailed: true,
+		},
+
+		{
+			description: "less than 3 - violation",
+			input: struct {
+				Value *string `validate:"omitempty,lt(3)"`
+			}{Value: stringPtr("434")},
+			expectFailed: true,
+		},
+		{
+			description: "less than 3 - valid",
+			input: struct {
+				Value string `validate:"omitempty,lt(5)"`
+			}{Value: "123"},
+			expectFailed: false,
+		},
+		{
+			description: "less than 300- valid",
+			input: struct {
+				Value int `validate:"omitempty,gt(0),lt(300)"`
+			}{Value: 200},
+			expectFailed: false,
+		},
+		{
+			description: "less between 0 .. 300 - invalid",
+			input: struct {
+				Value int `validate:"omitempty,gt(0),lt(100)"`
+			}{Value: 200},
+			expectFailed: true,
+		},
+		{
+			description: "less between 0 .. 300 - invalid",
+			input: struct {
+				Value int `validate:"omitempty,gt(0),lt(100)"`
+			}{Value: -1},
+			expectFailed: true,
+		},
+		{
+			description: "IAB category - valid 1",
+			input: struct {
+				Value string `validate:"omitempty,iabCategory"`
+			}{Value: "IAB2-22"},
+			expectFailed: false,
+		},
+		{
+			description: "IAB category- valid 2",
+			input: struct {
+				Value string `validate:"omitempty,iabCategory"`
+			}{Value: "IAB2"},
+			expectFailed: false,
+		},
+		{
+			description: "IAB categories - valid",
+			input: struct {
+				Value string `validate:"omitempty,iabCategories"`
+			}{Value: "IAB2-22,IAB8"},
+			expectFailed: false,
+		},
+		{
+			description: "IAB categories - invalid",
+			input: struct {
+				Value string `validate:"omitempty,iabCategories"`
+			}{Value: "sAB2-22,IAB8"},
+			expectFailed: true,
+		},
 	}
 
 	for _, testCase := range testCases {

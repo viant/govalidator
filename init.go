@@ -65,9 +65,15 @@ func init() {
 	Register("jWT", NewRegExprCheck(jWTRegex))
 	Register("bic", NewRegExprCheck(bicRegex))
 	Register("dnsRegexRFC1035Label", NewRegExprCheck(dnsRegexRFC1035Label))
-
-	Register("ge", NewGt())
-	Register("gte", NewGte())
+	Register("iabCategory", NewRegExprCheck(iabCategory))
+	Register("iabCategories", NewRepeatedRegExprCheck(iabCategory, ","))
+	Register("domain", NewRegExprCheck(domain))
+	Register("wwwDomain", NewRegExprCheck(worldWideWebDomain))
+	Register("notWWWDomain", NewNotRegExprCheck(worldWideWebDomain))
+	Register("gt", NewGt())
+	Register("lt", NewLt())
+	Register("ge", NewGte())
+	Register("le", NewLte())
 
 	RegisterAlias("phone", "e164", "localPhone")
 }
