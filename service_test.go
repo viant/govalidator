@@ -185,14 +185,14 @@ func TestService_Validate(t *testing.T) {
 		{
 			description: "valid top level domain",
 			input: struct {
-				Value *string `validate:"omitempty,domain,notWWWDomain"`
+				Value *string `validate:"omitempty,domain,nonWWWDomain"`
 			}{Value: stringPtr("lll.wp.pl")},
 			expectFailed: false,
 		},
 		{
 			description: "invalid top level domain",
 			input: struct {
-				Value *string `validate:"omitempty,domain,notWWWDomain"`
+				Value *string `validate:"omitempty,domain,nonWWWDomain"`
 			}{Value: stringPtr("www.wp.pl")},
 			expectFailed: true,
 		},

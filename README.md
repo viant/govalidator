@@ -92,8 +92,15 @@ validation, err := validator.Validate(someStruct)
 - jwt
 - bic
 - dnsregexrfc1035label
+- iabCategory
+- iabCategories
+- domain
+- wwwdomain
+- nonwwwDomain
 - gt(N)
-- gte(N)
+- ge(N)
+- lt(N)
+- le(N)
 
 
 ### Additional tag
