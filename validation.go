@@ -42,6 +42,7 @@ func (v *Validation) Append(path *Path, field string, value interface{}, check s
 		Check:    check,
 		Value:    value,
 	})
+	v.Failed = len(v.Violations) > 0
 }
 
 func (e *Validation) Error() string {
@@ -86,9 +87,9 @@ func derefIfNeeded(value interface{}) interface{} {
 		ptr := xunsafe.AsPointer(value)
 		if ptr == nil || (*unsafe.Pointer)(ptr) == nil {
 			return value
-		v = v.Elem()
-		value = v.Interface()
+			v = v.Elem()
+			value = v.Interface()
+		}
 	}
-}
-return value
+	return value
 }
