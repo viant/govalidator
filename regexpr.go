@@ -85,6 +85,7 @@ func NewRepeatedRegExprCheck(expr *regexp.Regexp, separator string) func(field *
 		if err != nil {
 			return nil, err
 		}
+		isPtr := false
 		return func(ctx context.Context, value interface{}) (bool, error) {
 			fragment := ""
 			switch actual := value.(type) {
@@ -93,6 +94,7 @@ func NewRepeatedRegExprCheck(expr *regexp.Regexp, separator string) func(field *
 			case []byte:
 				fragment = string(actual)
 			case *string:
+				isPtr = true
 				if actual != nil {
 					fragment = *actual
 				}
@@ -103,7 +105,11 @@ func NewRepeatedRegExprCheck(expr *regexp.Regexp, separator string) func(field *
 				return false, nil
 			}
 			for _, item := range strings.Split(fragment, separator) {
-				ret, err := isValid(ctx, item)
+				var value interface{} = item
+				if isPtr {
+					value = &item
+				}
+				ret, err := isValid(ctx, value)
 				if err != nil {
 					return false, err
 				}

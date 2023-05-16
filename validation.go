@@ -46,7 +46,7 @@ func (e *Validation) String() string {
 		return ""
 	}
 	msg := strings.Builder{}
-	msg.WriteString("Field validation for ")
+	msg.WriteString("Failed validation for ")
 	for i, v := range e.Violations {
 		if i > 0 {
 			msg.WriteString(",")
