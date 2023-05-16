@@ -21,6 +21,11 @@ type (
 	}
 )
 
+func (v *Validation) AddViolation(field string, value interface{}, check string, msg string) {
+	path := &Path{Kind: PathKinField, Name: field}
+	v.Append(path, field, value, check, msg)
+}
+
 func (v *Validation) Append(path *Path, field string, value interface{}, check string, msg string) {
 	value = derefIfNeeded(value)
 	if msg == "" {
