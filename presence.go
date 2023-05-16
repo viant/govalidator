@@ -16,6 +16,9 @@ type PresenceProvider struct {
 //Has returns true if value on holder field with index has been set
 func (p *PresenceProvider) Has(ptr unsafe.Pointer, index int) bool {
 	hasPtr := p.Holder.ValuePointer(ptr)
+	if index >= len(p.Fields) || p.Fields[index] == nil {
+		return false
+	}
 	return p.Fields[index].Bool(hasPtr)
 }
 
@@ -46,5 +49,6 @@ func (p *PresenceProvider) Init(filedPos map[string]int) error {
 			p.Fields[pos] = xunsafe.NewField(presentField)
 		}
 	}
+
 	return nil
 }

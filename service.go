@@ -152,14 +152,14 @@ func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *P
 		return nil
 	}
 	presence := options.PresenceProvider
-	for i, field := range checks.Fields {
+	for _, field := range checks.Fields {
 		fieldPath := path.Field(field.Field.Name)
 		fieldValue := field.Field.Value(ptr)
 
 		if isEmpty(fieldValue) && field.Omitempty {
 			continue
 		}
-		if !presence.IsFieldSet(ptr, i) {
+		if !presence.IsFieldSet(ptr, int(field.Field.Index)) {
 			continue
 		}
 
