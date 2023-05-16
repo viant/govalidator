@@ -209,6 +209,9 @@ func (s *Service) checksFor(t reflect.Type, presence *PresenceProvider) (*Checks
 	checks, ok := s.checks[t]
 	s.mux.RUnlock()
 	if ok {
+		if checks.presence != nil && presence != nil {
+			*presence = *checks.presence
+		}
 		return checks, nil
 	}
 	var err error
