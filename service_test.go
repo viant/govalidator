@@ -89,13 +89,15 @@ func TestService_Validate(t *testing.T) {
 			input: struct {
 				ID      int
 				Contact []struct {
+					XX    int
 					Email string `validate:"email"`
 				}
 			}{
 				ID: 1,
 				Contact: []struct {
+					XX    int
 					Email string `validate:"email"`
-				}{{"xyz"}, {"zz@wp.pl"}, {"rrrr"}},
+				}{{0, "xyz"}, {0, "zz@wp.pl"}, {0, "rrrr"}},
 			},
 			expectFailed: true,
 		},
@@ -163,8 +165,10 @@ func TestService_Validate(t *testing.T) {
 		{
 			description: "gte failed",
 			input: struct {
+				N     string
+				F     float64
 				Value int `validate:"gte=6"`
-			}{5},
+			}{"", 0.0, 5},
 			expectFailed: true,
 		},
 		{
