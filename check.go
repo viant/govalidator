@@ -40,8 +40,9 @@ func NewChecks(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
 	if sType.Kind() == reflect.Ptr {
 		sType = sType.Elem()
 	}
-	if checks.presence == nil {
-		checks.presence = &PresenceProvider{}
+	if presence == nil {
+		presence = &PresenceProvider{}
+		checks.presence = presence
 	}
 	xStruct := xunsafe.NewStruct(sType)
 	var fieldPos = map[string]int{}
