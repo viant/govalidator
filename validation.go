@@ -2,8 +2,10 @@ package govalidator
 
 import (
 	"fmt"
+	"github.com/viant/xunsafe"
 	"reflect"
 	"strings"
+	"unsafe"
 )
 
 type (
@@ -81,8 +83,12 @@ func derefIfNeeded(value interface{}) interface{} {
 	}
 	v := reflect.ValueOf(value)
 	if v.Kind() == reflect.Ptr {
+		ptr := xunsafe.AsPointer(value)
+		if ptr == nil || (*unsafe.Pointer)(ptr) == nil {
+			return value
 		v = v.Elem()
 		value = v.Interface()
 	}
-	return value
+}
+return value
 }
