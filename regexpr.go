@@ -92,6 +92,10 @@ func NewRepeatedRegExprCheck(expr *regexp.Regexp, separator string) func(field *
 				fragment = actual
 			case []byte:
 				fragment = string(actual)
+			case *string:
+				if actual != nil {
+					fragment = *actual
+				}
 			default:
 				return false, fmt.Errorf("invalid input type: expected: %T, but had: %T", fragment, value)
 			}
