@@ -44,7 +44,7 @@ func NewChecks(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
 	var fieldPos = map[string]int{}
 	for i := range xStruct.Fields {
 		xField := &xStruct.Fields[i]
-		fieldPos[xField.Name] = i
+		fieldPos[xField.Name] = int(xField.Index)
 		tagLiteral, ok := xField.Tag.Lookup("validate")
 		tag := ParseTag(tagLiteral)
 		if !tag.Presence {
