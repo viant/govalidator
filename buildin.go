@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/viant/xunsafe"
 	"reflect"
+	"unsafe"
 )
 
 type Zeroable interface {
@@ -12,7 +13,11 @@ type Zeroable interface {
 }
 
 func checkRequiredPtr(ctx context.Context, value interface{}) (bool, error) {
-	return value == nil, nil
+	ptr := xunsafe.AsPointer(value)
+	if ptr == nil || (*unsafe.Pointer)(ptr) == nil {
+		return false, nil
+	}
+	return true, nil
 }
 
 func checkRequiredString(ctx context.Context, value interface{}) (bool, error) {

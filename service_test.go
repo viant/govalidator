@@ -47,6 +47,20 @@ func TestService_Validate(t *testing.T) {
 		options      []Option
 	}{
 		{
+			description: "required string",
+			input: struct {
+				N *string `validate:"required"`
+			}{N: stringPtr("ddd")},
+			expectFailed: false,
+		},
+		{
+			description: "required string",
+			input: struct {
+				N *string `validate:"required"`
+			}{N: nil},
+			expectFailed: true,
+		},
+		{
 			description: "basic email validation",
 			input: struct {
 				Email string `validate:"email"`
@@ -105,6 +119,14 @@ func TestService_Validate(t *testing.T) {
 			input:        &RequiredCheck{ID: 1323},
 			expectFailed: true,
 		},
+		{
+			description: "required string",
+			input: struct {
+				N string `validate:"required"`
+			}{N: "ddd"},
+			expectFailed: false,
+		},
+
 		{
 			description: "With Presence pass",
 			input: &Record{
