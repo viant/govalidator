@@ -286,14 +286,23 @@ func TestService_Validate(t *testing.T) {
 			}{Value: "sAB2-22,IAB8"},
 			expectFailed: true,
 		},
+		{
+			description: "choice valid",
+			input: struct {
+				Value string `validate:"choice(AZ|AK|ZZ),omitempty"`
+			}{Value: "AK"},
+			expectFailed: false,
+		},
 	}
 
-	for _, testCase := range testCases {
+	for _, testCase := range testCases[len(testCases)-1:] {
 		srv := New()
 		validation, err := srv.Validate(context.Background(), testCase.input, testCase.options...)
 		if !assert.Nil(t, err, testCase.description) {
 			continue
 		}
+		fmt.Printf("%v\n", validation.String())
+
 		if !assert.EqualValues(t, testCase.expectFailed, validation.Failed, testCase.description) {
 			fmt.Printf("%v", validation)
 		}

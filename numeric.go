@@ -12,14 +12,23 @@ import (
 type Numeric struct{ param int }
 
 func (n *Numeric) intGt(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return intValue(value) > n.param, nil
 }
 
 func (n *Numeric) floatGt(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return floatValue(value) > float64(n.param), nil
 }
 
 func (n *Numeric) stringGt(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return int(utf8.RuneCountInString(stringValue(value))) > n.param, nil
 }
 func (n *Numeric) timeGt(ctx context.Context, value interface{}) (bool, error) {
@@ -31,14 +40,23 @@ func (n *Numeric) sliceGt(ctx context.Context, value interface{}) (bool, error) 
 }
 
 func (n *Numeric) intLt(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return intValue(value) < n.param, nil
 }
 
 func (n *Numeric) floatLt(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return floatValue(value) < float64(n.param), nil
 }
 
 func (n *Numeric) stringLt(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return int(utf8.RuneCountInString(stringValue(value))) < n.param, nil
 }
 func (n *Numeric) timeLt(ctx context.Context, value interface{}) (bool, error) {
@@ -50,14 +68,23 @@ func (n *Numeric) sliceLt(ctx context.Context, value interface{}) (bool, error) 
 }
 
 func (n *Numeric) intGte(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return intValue(value) >= n.param, nil
 }
 
 func (n *Numeric) floatGte(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return floatValue(value) >= float64(n.param), nil
 }
 
 func (n *Numeric) stringGte(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return int(utf8.RuneCountInString(stringValue(value))) >= n.param, nil
 }
 
@@ -70,14 +97,23 @@ func (n *Numeric) sliceGte(ctx context.Context, value interface{}) (bool, error)
 }
 
 func (n *Numeric) intLte(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return intValue(value) <= n.param, nil
 }
 
 func (n *Numeric) floatLte(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return floatValue(value) <= float64(n.param), nil
 }
 
 func (n *Numeric) stringLte(ctx context.Context, value interface{}) (bool, error) {
+	if isBaseTypeNil(value) {
+		return false, nil
+	}
 	return int(utf8.RuneCountInString(stringValue(value))) <= n.param, nil
 }
 
@@ -93,7 +129,24 @@ func sliceLen(value interface{}) int {
 	header := (*reflect.SliceHeader)(xunsafe.AsPointer(value))
 	return header.Len
 }
-
+func isBaseTypeNil(value interface{}) bool {
+	if value == nil {
+		return true
+	}
+	switch actual := value.(type) {
+	case *string:
+		return (*string)(xunsafe.AsPointer(actual)) == nil
+	case *int, *int64, *uint, *uint64:
+		return (*int)(xunsafe.AsPointer(actual)) == nil
+	case *uint32, *int32:
+		return (*int32)(xunsafe.AsPointer(actual)) == nil
+	case *int16, *uint16:
+		return (*int16)(xunsafe.AsPointer(actual)) == nil
+	case *int8, *uint8:
+		return (*int8)(xunsafe.AsPointer(actual)) == nil
+	}
+	return false
+}
 func intValue(value interface{}) int {
 	switch actual := value.(type) {
 	case int:

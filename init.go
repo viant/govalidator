@@ -74,6 +74,6 @@ func init() {
 	Register("lt", NewLt())
 	Register("ge", NewGte())
 	Register("le", NewLte())
-
+	Register("choice", NewChoice())
 	RegisterAlias("phone", "e164", "localPhone")
 }

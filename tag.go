@@ -74,7 +74,7 @@ func extractNameWithParams(text string) (string, []string) {
 		argsFragment = argsFragment[:index]
 	}
 	var params []string
-	for _, item := range strings.Split(argsFragment, ",") {
+	for _, item := range strings.Split(argsFragment, "|") {
 		params = append(params, strings.TrimSpace(item))
 	}
 	return name, params
