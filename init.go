@@ -70,6 +70,7 @@ func init() {
 	Register("domain", NewRegExprCheck(domain))
 	Register("wwwdomain", NewRegExprCheck(worldWideWebDomain))
 	Register("nonwwwdomain", NewNotRegExprCheck(worldWideWebDomain))
+	Register("topdomain", NewNotRegExprCheck(worldWideWebDomain))
 	Register("gt", NewGt())
 	Register("lt", NewLt())
 	Register("ge", NewGte())

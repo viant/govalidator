@@ -60,6 +60,10 @@ func (e *Validation) String() string {
 			msg.WriteString(",")
 		}
 		msg.WriteString(v.Location)
+		msg.WriteString("(")
+		msg.WriteString(v.Check)
+		msg.WriteString(")")
+
 	}
 	return msg.String()
 }
