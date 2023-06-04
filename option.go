@@ -1,18 +1,21 @@
 package govalidator
 
+import "github.com/viant/structology"
+
 type (
 	Options struct {
-		PresenceProvider *PresenceProvider
-		Shallow          bool
-		Path             *Path
+		UseMarker bool
+		marker    *structology.Marker
+		Shallow   bool
+		Path      *Path
 	}
 	Option func(c *Options)
 )
 
-//WithPresence creates with presence option
+//WithPresence creates with marker option
 func WithPresence() Option {
 	return func(c *Options) {
-		c.PresenceProvider = &PresenceProvider{}
+		c.UseMarker = true
 	}
 }
 

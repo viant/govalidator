@@ -75,7 +75,7 @@ func (s *Service) validateStruct(ctx context.Context, t reflect.Type, value inte
 	}
 	session := ctx.Value(SessionKey).(*Session)
 	ptr := xunsafe.AsPointer(value)
-	checks, err := s.checksFor(t, options.PresenceProvider)
+	checks, err := s.checksFor(t)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *P
 	if len(checks.Fields) == 0 {
 		return nil
 	}
-	presence := options.PresenceProvider
+	presence := checks.marker
 	for _, field := range checks.Fields {
 		fieldPath := path.Field(field.Field.Name)
 		fieldValue := field.Field.Value(ptr)
@@ -159,8 +159,11 @@ func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *P
 		if isEmpty(fieldValue) && field.Omitempty {
 			continue
 		}
-		if !presence.IsFieldSet(ptr, int(field.Field.Index)) {
-			continue
+
+		if options.UseMarker && presence.CanUseHolder(ptr) {
+			if !presence.IsSet(ptr, int(field.Field.Index)) {
+				continue
+			}
 		}
 
 		session.Set(path, field.Field, value)
@@ -201,7 +204,7 @@ func (s *Service) validateSlice(ctx context.Context, t reflect.Type, any interfa
 	return nil
 }
 
-func (s *Service) checksFor(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
+func (s *Service) checksFor(t reflect.Type) (*Checks, error) {
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
@@ -209,13 +212,10 @@ func (s *Service) checksFor(t reflect.Type, presence *PresenceProvider) (*Checks
 	checks, ok := s.checks[t]
 	s.mux.RUnlock()
 	if ok {
-		if checks.presence != nil && presence != nil {
-			*presence = *checks.presence
-		}
 		return checks, nil
 	}
 	var err error
-	if checks, err = NewChecks(t, presence); err != nil {
+	if checks, err = NewChecks(t); err != nil {
 		return nil, err
 	}
 	s.mux.Lock()

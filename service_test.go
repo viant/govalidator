@@ -21,7 +21,7 @@ func TestService_Validate(t *testing.T) {
 		Name  *string    `validate:"required"`
 		Phone string     `validate:"phone"`
 		Email string     `validate:"omitempty,email"`
-		Has   *RecordHas `validate:"presence"`
+		Has   *RecordHas `setMarker:"true"`
 	}
 
 	type BasicRecord struct {
@@ -139,7 +139,7 @@ func TestService_Validate(t *testing.T) {
 			expectFailed: false,
 		},
 		{
-			description: "With presence failed",
+			description: "With marker failed",
 			input: &Record{
 				Id: 1,
 				Has: &RecordHas{
@@ -289,21 +289,22 @@ func TestService_Validate(t *testing.T) {
 		{
 			description: "choice valid",
 			input: struct {
-				Value string `validate:"choice(AZ|AK|ZZ),omitempty"`
+				Value string `validate:"choice(AZ,AK,ZZ),omitempty"`
 			}{Value: "AK"},
 			expectFailed: false,
 		},
 	}
 
-	for _, testCase := range testCases[len(testCases)-1:] {
+	for _, testCase := range testCases {
 		srv := New()
+
 		validation, err := srv.Validate(context.Background(), testCase.input, testCase.options...)
 		if !assert.Nil(t, err, testCase.description) {
 			continue
 		}
-		fmt.Printf("%v\n", validation.String())
 
 		if !assert.EqualValues(t, testCase.expectFailed, validation.Failed, testCase.description) {
+			fmt.Printf("%v\n", validation.String())
 			fmt.Printf("%v", validation)
 		}
 	}

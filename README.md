@@ -101,7 +101,7 @@ validation, err := validator.Validate(someStruct)
 - ge(N)
 - lt(N)
 - le(N)
-- choice(pipe separated list of allowed int or string values)
+- choice(coma separated list of allowed int or string values)
 
 ### Additional tag
 - omitempty

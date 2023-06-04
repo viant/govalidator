@@ -11,7 +11,6 @@ type (
 		Omitempty bool
 		Required  bool
 		SkipPath  bool
-		Presence  bool
 	}
 
 	//Check represents validation check
@@ -25,14 +24,14 @@ type (
 //ParseTag parses rule
 func ParseTag(tagString string) *Tag {
 	tag := &Tag{}
-	elements := strings.Split(tagString, ",")
+
+	elements := extractElements(tagString)
 	if len(elements) == 0 {
-		return nil
+		return tag
 	}
 	tag.Required = strings.Contains(strings.ToLower(tagString), "required")
 	tag.Omitempty = strings.Contains(strings.ToLower(tagString), "omitempty")
 	tag.SkipPath = strings.Contains(strings.ToLower(tagString), "skippath")
-	tag.Presence = strings.Contains(strings.ToLower(tagString), "presence")
 
 	for _, element := range elements {
 		check := Check{}
@@ -52,12 +51,43 @@ func ParseTag(tagString string) *Tag {
 			check.Name, check.Parameters = extractNameWithParams(strings.TrimSpace(element))
 		}
 		switch strings.ToLower(check.Name) {
-		case "omitempty", "skippath", "presence":
+		case "omitempty", "skippath", "marker":
 			continue
 		}
 		tag.Checks = append(tag.Checks, check)
 	}
 	return tag
+}
+
+func extractElements(decoded string) []string {
+	var result []string
+
+	var fragment = ""
+	var inCall bool
+	for i, c := range decoded {
+		switch decoded[i] {
+		case ',', '|':
+			if inCall {
+				fragment += string(c)
+				continue
+			}
+			result = append(result, fragment)
+			fragment = ""
+		case '(':
+			fragment += string(c)
+			inCall = true
+
+		case ')':
+			fragment += string(c)
+			inCall = false
+		default:
+			fragment += string(c)
+		}
+	}
+	if fragment != "" {
+		result = append(result, fragment)
+	}
+	return result
 }
 
 var emptyArgs = []string{}
@@ -74,7 +104,7 @@ func extractNameWithParams(text string) (string, []string) {
 		argsFragment = argsFragment[:index]
 	}
 	var params []string
-	for _, item := range strings.Split(argsFragment, "|") {
+	for _, item := range strings.Split(argsFragment, ",") {
 		params = append(params, strings.TrimSpace(item))
 	}
 	return name, params

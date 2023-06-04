@@ -2,6 +2,7 @@ package govalidator
 
 import (
 	"fmt"
+	"github.com/viant/structology"
 	"github.com/viant/xunsafe"
 	"reflect"
 	"time"
@@ -28,38 +29,29 @@ type (
 
 		Slices  []*Field
 		Structs []*Field
-
-		presence *PresenceProvider
+		marker  *structology.Marker
 	}
 )
 
 //NewChecks returns new checks
-func NewChecks(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
-	checks := &Checks{Type: t, presence: presence}
+func NewChecks(t reflect.Type) (*Checks, error) {
+	checks := &Checks{Type: t}
 	sType := t
 	if sType.Kind() == reflect.Ptr {
 		sType = sType.Elem()
 	}
-	if presence == nil {
-		presence = &PresenceProvider{}
-		checks.presence = presence
-	}
+	checks.marker, _ = structology.NewMarker(sType)
 	xStruct := xunsafe.NewStruct(sType)
+
 	var fieldPos = map[string]int{}
 	for i := range xStruct.Fields {
 		xField := &xStruct.Fields[i]
 		fieldPos[xField.Name] = int(xField.Index)
 		tagLiteral, ok := xField.Tag.Lookup("validate")
 		tag := ParseTag(tagLiteral)
-		if !tag.Presence {
-			if _, ok := xField.Tag.Lookup("presenceIndex"); ok {
-				tag.Presence = ok
-			}
+		if structology.IsSetMarker(xField.Tag) {
+			continue
 		}
-		if presence != nil && tag.Presence {
-			presence.Holder = xField
-		}
-
 		if isStruct(xField.Type) && !isTime(xField.Type) {
 			checks.Structs = append(checks.Structs, &Field{Tag: tag, Field: xField})
 		} else if isSliceStruct(xField.Type) {
@@ -84,12 +76,6 @@ func NewChecks(t reflect.Type, presence *PresenceProvider) (*Checks, error) {
 
 		}
 		checks.Fields = append(checks.Fields, fieldCheck)
-	}
-
-	if presence != nil && presence.Holder != nil {
-		if err := presence.Init(fieldPos); err != nil {
-			return nil, err
-		}
 	}
 	return checks, nil
 }
