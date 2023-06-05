@@ -135,7 +135,7 @@ func TestService_Validate(t *testing.T) {
 				Id:  1,
 				Has: &RecordHas{},
 			},
-			options:      []Option{WithPresence()},
+			options:      []Option{WithSetMarker()},
 			expectFailed: false,
 		},
 		{
@@ -146,7 +146,7 @@ func TestService_Validate(t *testing.T) {
 					Name: true,
 				},
 			},
-			options:      []Option{WithPresence()},
+			options:      []Option{WithSetMarker()},
 			expectFailed: true,
 		},
 		{

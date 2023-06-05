@@ -6,7 +6,6 @@ import (
 	"github.com/viant/xunsafe"
 	"reflect"
 	"sync"
-	"time"
 	"unsafe"
 )
 
@@ -224,21 +223,6 @@ func (s *Service) checksFor(t reflect.Type) (*Checks, error) {
 	return checks, nil
 }
 
-func isNil(value interface{}) bool {
-	switch actual := value.(type) {
-	case *int, *uint, *int64, *uint64:
-		ptr := (*int)(xunsafe.AsPointer(actual))
-		return ptr == nil
-	case *uint8:
-		return actual == nil
-	case *string:
-		return actual == nil
-	case *time.Time:
-		return actual == nil
-	default:
-		return value == nil
-	}
-}
 func isEmpty(value interface{}) bool {
 	switch actual := value.(type) {
 	case *int, *uint, *int64, *uint64:

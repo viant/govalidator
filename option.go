@@ -12,8 +12,8 @@ type (
 	Option func(c *Options)
 )
 
-//WithPresence creates with marker option
-func WithPresence() Option {
+//WithSetMarker creates with marker option
+func WithSetMarker() Option {
 	return func(c *Options) {
 		c.UseMarker = true
 	}
