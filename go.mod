@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/stretchr/testify v1.8.4
-	github.com/viant/structology v0.1.0
+	github.com/viant/structology v0.2.0
 	github.com/viant/xunsafe v0.8.4
 )
 
