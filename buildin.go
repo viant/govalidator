@@ -34,12 +34,12 @@ func checkRequiredSlice(ctx context.Context, value interface{}) (bool, error) {
 	return header.Len > 0, nil
 }
 
-func checkRequiredZeroStruct(ctx context.Context, value interface{}) (bool, error) {
+func checkRequiredNoZeroStruct(ctx context.Context, value interface{}) (bool, error) {
 	zeroer, ok := value.(Zeroable)
 	if !ok {
 		return false, fmt.Errorf("expected: %T, but had: %T", zeroer, value)
 	}
-	return zeroer.IsZero(), nil
+	return !zeroer.IsZero(), nil
 }
 
 func newRequiredCheck(field *Field, check *Check) (IsValid, error) {
@@ -47,11 +47,11 @@ func newRequiredCheck(field *Field, check *Check) (IsValid, error) {
 	case reflect.Ptr:
 		return checkRequiredPtr, nil
 	case reflect.Struct:
-		_, ok := field.Type.MethodByName("Zeroable")
+		_, ok := field.Type.MethodByName("IsZero")
 		if !ok {
-			return nil, fmt.Errorf("struct does not implemt Zeroable for required check: %v", field.Type.String())
+			return nil, fmt.Errorf("struct does not implement IsZero for required check: %v", field.Type.String())
 		}
-		return checkRequiredZeroStruct, nil
+		return checkRequiredNoZeroStruct, nil
 	case reflect.String:
 		return checkRequiredString, nil
 	case reflect.Slice:

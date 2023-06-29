@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"time"
 )
 
 func TestService_Validate(t *testing.T) {
@@ -128,7 +129,20 @@ func TestService_Validate(t *testing.T) {
 			}{N: "ddd"},
 			expectFailed: false,
 		},
-
+		{
+			description: "required struct - zero value timestamp",
+			input: struct {
+				time time.Time `validate:"required"`
+			}{time: time.Time{}}, // zero value time time.Parse(time.RFC3339, "0001-01-01T00:00:00Z")
+			expectFailed: true,
+		},
+		{
+			description: "required struct - non zero value timestamp",
+			input: struct {
+				time time.Time `validate:"required"`
+			}{time: getTime("2023-06-29T23:09:15Z")},
+			expectFailed: false,
+		},
 		{
 			description: "With Presence pass",
 			input: &Record{
@@ -312,4 +326,12 @@ func TestService_Validate(t *testing.T) {
 
 func stringPtr(s string) *string {
 	return &s
+}
+
+func getTime(timeStr string) time.Time {
+	r, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		return time.Time{}
+	}
+	return r
 }
