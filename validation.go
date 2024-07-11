@@ -86,7 +86,7 @@ func derefIfNeeded(value interface{}) interface{} {
 	if value == nil {
 		return nil
 	}
-	v := reflect.ValueOf(value)
+	v := reflect.TypeOf(value)
 	if v.Kind() == reflect.Ptr {
 		ptr := xunsafe.AsPointer(value)
 		if ptr == nil || (*unsafe.Pointer)(ptr) == nil {

@@ -54,8 +54,15 @@ func newRequiredCheck(field *Field, check *Check) (IsValid, error) {
 		return checkRequiredZeroStruct, nil
 	case reflect.String:
 		return checkRequiredString, nil
+	case reflect.Int:
+		return checkRequiredInt, nil
 	case reflect.Slice:
 		return checkRequiredSlice, nil
 	}
-	return nil, fmt.Errorf("required unsupported type: %v", field.Type.String())
+	return nil, fmt.Errorf("required unsupported type: %v %v", field.Name, field.Type.String())
+}
+
+func checkRequiredInt(ctx context.Context, value interface{}) (bool, error) {
+	intValue, _ := value.(int)
+	return intValue != 0, nil
 }

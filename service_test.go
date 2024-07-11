@@ -16,6 +16,10 @@ func TestService_Validate(t *testing.T) {
 		Email bool
 	}
 
+	type Req struct {
+		Id int `validate:"required"`
+	}
+
 	type Record struct {
 		Id    int
 		Name  *string    `validate:"required"`
@@ -46,6 +50,13 @@ func TestService_Validate(t *testing.T) {
 		expectFailed bool
 		options      []Option
 	}{
+		{
+			description: "required int",
+			input: struct {
+				N int `validate:"required"`
+			}{N: 1},
+			expectFailed: false,
+		},
 		{
 			description: "required string",
 			input: struct {
