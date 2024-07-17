@@ -10,7 +10,7 @@ import (
 
 type (
 
-	//FieldCheck represents field checks
+	//FieldCheckPos represents field checks
 	FieldCheck struct {
 		*Field
 		Owner   reflect.Type
@@ -20,20 +20,21 @@ type (
 	Field struct {
 		*Tag
 		*xunsafe.Field
+		FieldCheck *FieldCheck
 	}
 
 	//Checks represents struct checks
 	Checks struct {
-		Type   reflect.Type
-		Fields []*FieldCheck
-
-		Slices  []*Field
-		Structs []*Field
-		marker  *structology.Marker
+		Type         reflect.Type
+		Fields       []*FieldCheck
+		Slices       []*Field
+		Structs      []*Field
+		SimpleSlices []*Field
+		marker       *structology.Marker
 	}
 )
 
-//NewChecks returns new checks
+// NewChecks returns new checks
 func NewChecks(t reflect.Type) (*Checks, error) {
 	checks := &Checks{Type: t}
 	sType := t
@@ -56,28 +57,57 @@ func NewChecks(t reflect.Type) (*Checks, error) {
 			checks.Structs = append(checks.Structs, &Field{Tag: tag, Field: xField})
 		} else if isSliceStruct(xField.Type) {
 			checks.Slices = append(checks.Slices, &Field{Tag: tag, Field: xField})
+		} else if xField.Type.Kind() == reflect.Slice && isPrimitive(xField.Type.Elem()) {
+			field := &Field{Tag: tag, Field: xField}
+			if ok {
+				fieldCheck, err := buildFieldCheck(sType, field, tag)
+				if err != nil {
+					return nil, err
+				}
+				field.FieldCheck = fieldCheck
+			}
+			checks.SimpleSlices = append(checks.SimpleSlices, field)
+			continue
 		}
 		if !ok || tagLiteral == "" {
 			continue
 		}
 		field := &Field{Tag: tag, Field: xField}
-		fieldCheck := &FieldCheck{Owner: sType, Field: field}
-		for i := range tag.Checks {
-			check := &tag.Checks[i]
-			newCheck := LookupAll(check.Name)
-			if newCheck == nil {
-				return nil, fmt.Errorf("unknown check: %v", check.Name)
-			}
-			isValid, err := newCheck(field, check)
-			if err != nil {
-				return nil, err
-			}
-			fieldCheck.IsValid = append(fieldCheck.IsValid, isValid)
-
+		fieldCheck, err := buildFieldCheck(sType, field, tag)
+		if err != nil {
+			return nil, err
 		}
 		checks.Fields = append(checks.Fields, fieldCheck)
 	}
 	return checks, nil
+}
+
+func buildFieldCheck(sType reflect.Type, field *Field, tag *Tag) (*FieldCheck, error) {
+	fieldCheck := &FieldCheck{Owner: sType, Field: field}
+	for i := range tag.Checks {
+		check := &tag.Checks[i]
+		newCheck := LookupAll(check.Name)
+		if newCheck == nil {
+			return nil, fmt.Errorf("unknown check: %v", check.Name)
+		}
+		isValid, err := newCheck(field, check)
+		if err != nil {
+			return nil, err
+		}
+		fieldCheck.IsValid = append(fieldCheck.IsValid, isValid)
+
+	}
+	return fieldCheck, nil
+}
+
+func isPrimitive(t reflect.Type) bool {
+	if t.Kind() == reflect.String {
+		return true
+	}
+	if t.Kind() == reflect.Int {
+		return true
+	}
+	return false
 }
 
 func isSliceStruct(t reflect.Type) bool {

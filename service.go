@@ -9,7 +9,7 @@ import (
 	"unsafe"
 )
 
-//Service represents a service
+// Service represents a service
 type Service struct {
 	checks map[reflect.Type]*Checks
 	mux    sync.RWMutex
@@ -42,6 +42,13 @@ func (s *Service) validate(ctx context.Context, any interface{}, validation *Val
 			return s.validateStruct(ctx, t.Elem(), any, validation, options)
 		case reflect.Slice:
 			return s.validateSlice(ctx, t.Elem(), any, validation, options)
+		case reflect.String:
+			actual := any.([]string)
+			for _, value := range actual {
+				if err := s.validate(ctx, value, validation, options); err != nil {
+					return err
+				}
+			}
 		}
 	case reflect.Struct:
 		return s.validateStruct(ctx, t, any, validation, options)
@@ -94,6 +101,11 @@ func (s *Service) validateStruct(ctx context.Context, t reflect.Type, value inte
 	if err != nil {
 		return err
 	}
+	err = s.diveSimpleSliceFields(ctx, checks, path, ptr, session, validation, options)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -146,6 +158,51 @@ func (s *Service) diveSliceFields(ctx context.Context, checks *Checks, path *Pat
 	return nil
 }
 
+func (s *Service) diveSimpleSliceFields(ctx context.Context, checks *Checks, path *Path, ptr unsafe.Pointer, session *Session, validation *Validation, options *Options) error {
+
+	if len(checks.SimpleSlices) == 0 {
+		return nil
+	}
+	for _, candidate := range checks.SimpleSlices {
+		fieldPath := path.Field(candidate.Name)
+		if candidate.SkipPath {
+			fieldPath = path
+		}
+
+		fieldValue := candidate.Value(ptr)
+		if fieldValue == nil {
+			continue
+		}
+		if candidate.Kind() == reflect.Ptr {
+			fieldValue = deref(fieldValue)
+		}
+		if candidate.FieldCheck == nil {
+			continue
+		}
+		fieldCheck := candidate.FieldCheck
+		session.Set(fieldPath, candidate, fieldValue)
+		switch actual := fieldValue.(type) {
+		case []string:
+			for j, item := range actual {
+				elemPath := fieldPath.Element(j)
+				session.Set(elemPath, candidate, item)
+				if err := s.checkValue(ctx, fieldCheck, item, options, validation, elemPath); err != nil {
+					return err
+				}
+			}
+		case []int:
+			for j, item := range actual {
+				elemPath := fieldPath.Element(j)
+				session.Set(elemPath, candidate, item)
+				if err := s.checkValue(ctx, fieldCheck, item, options, validation, elemPath); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *Path, ptr unsafe.Pointer, session *Session, value interface{}, validation *Validation, options *Options) error {
 	if len(checks.Fields) == 0 {
 		return nil
@@ -166,15 +223,31 @@ func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *P
 		}
 
 		session.Set(path, field.Field, value)
-		for i, isValid := range field.IsValid {
-			passed, err := isValid(ctx, fieldValue)
-			if err != nil {
-				return err
+		err := s.checkValue(ctx, field, fieldValue, options, validation, fieldPath)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *Service) checkValue(ctx context.Context, field *FieldCheck, fieldValue interface{}, options *Options, validation *Validation, fieldPath *Path) error {
+	for i, isValid := range field.IsValid {
+		passed, err := isValid(ctx, fieldValue)
+		if err != nil {
+			return err
+		}
+		if !passed {
+			if field.Type.Kind() == reflect.Ptr && !options.PreservePointer {
+
+				if isNil := isNil(fieldValue); isNil {
+					fieldValue = nil
+				} else {
+					fieldValue = deref(fieldValue)
+				}
 			}
-			if !passed {
-				validation.Append(fieldPath, field.Field.Name, fieldValue, field.Checks[i].Name, field.Checks[i].Message)
-				break
-			}
+			validation.Append(fieldPath, field.Field.Name, fieldValue, field.Checks[i].Name, field.Checks[i].Message)
+			break
 		}
 	}
 	return nil
@@ -184,6 +257,7 @@ func (s *Service) validateSlice(ctx context.Context, t reflect.Type, any interfa
 	if t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
+
 	xSlice := xunsafe.NewSlice(t)
 	session := ctx.Value(SessionKey).(*Session)
 	slicePtr := xunsafe.AsPointer(any)
@@ -246,6 +320,29 @@ func isEmpty(value interface{}) bool {
 		}
 		return value == nil
 	}
+}
+
+func isNil(value interface{}) bool {
+	switch actual := value.(type) {
+	case *int, *uint, *int64, *uint64:
+		ptr := (*int)(xunsafe.AsPointer(actual))
+		return ptr == nil
+	case *uint8:
+		return actual == nil
+	case *string:
+		if actual == nil {
+			return true
+		}
+	default:
+		if value == nil {
+			return true
+		}
+		if zeroer, ok := value.(Zeroable); ok {
+			return zeroer.IsZero()
+		}
+		return value == nil
+	}
+	return false
 }
 
 func New() *Service {

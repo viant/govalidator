@@ -48,7 +48,7 @@ func (c *Choice) setStrings(args []string) {
 
 }
 
-//NewChoice creates choice/enum value checks
+// NewChoice creates choice/enum value checks
 func NewChoice() func(field *Field, check *Check) (IsValid, error) {
 
 	return func(field *Field, check *Check) (IsValid, error) {
@@ -67,6 +67,17 @@ func NewChoice() func(field *Field, check *Check) (IsValid, error) {
 		case reflect.String:
 			choice.setStrings(check.Parameters)
 			return choice.checkStrings, nil
+		case reflect.Slice:
+			switch field.Elem().Kind() {
+			case reflect.String:
+				choice.setStrings(check.Parameters)
+				return choice.checkStrings, nil
+			case reflect.Int, reflect.Uint, reflect.Int64, reflect.Uint64:
+				if err := choice.setInts(check.Parameters); err != nil {
+					return nil, err
+				}
+				return choice.checkInts, nil
+			}
 		case reflect.Ptr:
 			switch field.Elem().Kind() {
 			case reflect.Int, reflect.Uint, reflect.Int64, reflect.Uint64:
