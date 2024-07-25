@@ -25,12 +25,13 @@ type (
 
 	//Checks represents struct checks
 	Checks struct {
-		Type         reflect.Type
-		Fields       []*FieldCheck
-		Slices       []*Field
-		Structs      []*Field
-		SimpleSlices []*Field
-		marker       *structology.Marker
+		Type           reflect.Type
+		Fields         []*FieldCheck
+		Slices         []*Field
+		Structs        []*Field
+		SimpleSlices   []*Field
+		marker         *structology.Marker
+		markerProvider CanUseMarkerProvider
 	}
 )
 

@@ -2,14 +2,18 @@ package govalidator
 
 import "github.com/viant/structology"
 
+type CanUseMarkerProvider func(v interface{}) bool
+
 type (
 	Options struct {
-		UseMarker       bool
-		PreservePointer bool
-		marker          *structology.Marker
-		Shallow         bool
-		Path            *Path
+		UseMarker            bool
+		PreservePointer      bool
+		marker               *structology.Marker
+		Shallow              bool
+		Path                 *Path
+		CanUseMarkerProvider CanUseMarkerProvider
 	}
+
 	Option func(c *Options)
 )
 
@@ -38,6 +42,14 @@ func WithShallow(flag bool) Option {
 func WithPreservePointer(flag bool) Option {
 	return func(c *Options) {
 		c.PreservePointer = flag
+	}
+}
+
+// WithCanUseMarkerProvider creates with marker provider option
+func WithCanUseMarkerProvider(provider CanUseMarkerProvider) Option {
+	return func(c *Options) {
+		c.UseMarker = true
+		c.CanUseMarkerProvider = provider
 	}
 }
 

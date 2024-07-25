@@ -20,8 +20,13 @@ func (s *Service) Validate(ctx context.Context, any interface{}, opts ...Option)
 	for _, opt := range opts {
 		opt(options)
 	}
+	rootPath := NewPath()
+	if options.Path != nil {
+		rootPath.Path = options.Path
+	}
 	validation := &Validation{}
-	ctx = SessionContext(ctx, &Session{Path: &Path{}})
+	ctx = SessionContext(ctx, &Session{Path: rootPath})
+
 	if err := s.validate(ctx, any, validation, options); err != nil {
 		return nil, err
 	}
@@ -208,6 +213,12 @@ func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *P
 		return nil
 	}
 	presence := checks.marker
+
+	canUseMarker := options.UseMarker && presence.CanUseHolder(ptr)
+	if options.CanUseMarkerProvider != nil && canUseMarker {
+		canUseMarker = options.CanUseMarkerProvider(value)
+	}
+
 	for _, field := range checks.Fields {
 		fieldPath := path.Field(field.Field.Name)
 		fieldValue := field.Field.Value(ptr)
@@ -239,7 +250,6 @@ func (s *Service) checkValue(ctx context.Context, field *FieldCheck, fieldValue 
 		}
 		if !passed {
 			if field.Type.Kind() == reflect.Ptr && !options.PreservePointer {
-
 				if isNil := isNil(fieldValue); isNil {
 					fieldValue = nil
 				} else {

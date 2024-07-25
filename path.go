@@ -30,22 +30,22 @@ type (
 	}
 )
 
-//Field add fields node
+// Field add fields node
 func (p *Path) Field(name string) *Path {
 	return &Path{Name: name, Kind: PathKinField, Path: p}
 }
 
-//Entry adds map entry node
+// Entry adds map entry node
 func (p *Path) Entry(name string) *Path {
 	return &Path{Key: name, Kind: PathKindKey, Path: p}
 }
 
-//Element adds slice element node
+// Element adds slice element node
 func (p *Path) Element(index int) *Path {
 	return &Path{Index: index, Kind: PathKindIndex, Path: p}
 }
 
-//String stringifies a path
+// String stringifies a path
 func (p *Path) String() string {
 	builder := new(strings.Builder)
 	p.stringify(builder)
@@ -79,5 +79,12 @@ func (p *Path) stringify(builder *strings.Builder) {
 		builder.WriteByte('[')
 		builder.WriteString(strconv.Itoa(p.Index))
 		builder.WriteByte(']')
+	}
+}
+
+// NewPath creates a new path
+func NewPath() *Path {
+	return &Path{
+		Kind: PathKindRoot,
 	}
 }
