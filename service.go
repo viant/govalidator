@@ -227,7 +227,7 @@ func (s *Service) checkStructFields(ctx context.Context, checks *Checks, path *P
 			continue
 		}
 
-		if options.UseMarker && presence.CanUseHolder(ptr) {
+		if canUseMarker && presence.CanUseHolder(ptr) {
 			if !presence.IsSet(ptr, int(field.Field.Index)) {
 				continue
 			}
