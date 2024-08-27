@@ -56,6 +56,8 @@ func newRequiredCheck(field *Field, check *Check) (IsValid, error) {
 		return checkRequiredString, nil
 	case reflect.Int:
 		return checkRequiredInt, nil
+	case reflect.Float64:
+		return checkRequiredFloat64, nil
 	case reflect.Slice:
 		return checkRequiredSlice, nil
 	}
@@ -64,5 +66,15 @@ func newRequiredCheck(field *Field, check *Check) (IsValid, error) {
 
 func checkRequiredInt(ctx context.Context, value interface{}) (bool, error) {
 	intValue, _ := value.(int)
+	return intValue != 0, nil
+}
+
+func checkRequiredInt(ctx context.Context, value interface{}) (bool, error) {
+	intValue, _ := value.(int)
+	return intValue != 0, nil
+}
+
+func checkRequiredFloat64(ctx context.Context, value interface{}) (bool, error) {
+	intValue, _ := value.(float64)
 	return intValue != 0, nil
 }
