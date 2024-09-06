@@ -72,9 +72,16 @@ func checkRequiredInt(ctx context.Context, value interface{}) (bool, error) {
 	return intValue != 0, nil
 }
 
+var boolType = reflect.TypeOf(true)
+
 func checkRequiredBool(ctx context.Context, value interface{}) (bool, error) {
-	intValue, _ := value.(bool)
-	return intValue, nil
+	switch actual := value.(type) {
+	case bool:
+		return actual, nil
+	default:
+		ret := reflect.ValueOf(value).Bool()
+		return ret, nil
+	}
 }
 
 func checkRequiredFloat64(ctx context.Context, value interface{}) (bool, error) {
