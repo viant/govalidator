@@ -6,6 +6,7 @@ import (
 	"github.com/viant/xunsafe"
 	"reflect"
 	"sync"
+	"time"
 	"unsafe"
 )
 
@@ -319,17 +320,24 @@ func isEmpty(value interface{}) bool {
 			return true
 		}
 		return *actual == ""
-	case string:
-		return actual == ""
-	default:
-		if value == nil {
+	case *time.Time:
+		if actual == nil {
 			return true
 		}
 		if zeroer, ok := value.(Zeroable); ok {
 			return zeroer.IsZero()
 		}
-		return value == nil
+	case string:
+		return actual == ""
 	}
+	if value == nil {
+		return true
+	}
+	if zeroer, ok := value.(Zeroable); ok {
+		return zeroer.IsZero()
+	}
+	return value == nil
+
 }
 
 func isNil(value interface{}) bool {
