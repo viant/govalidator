@@ -215,7 +215,7 @@ func floatValue(value interface{}) float64 {
 	return 0
 }
 
-//NewGt creates greater than validation check
+// NewGt creates greater than validation check
 func NewGt() func(field *Field, check *Check) (IsValid, error) {
 	return func(field *Field, check *Check) (IsValid, error) {
 		param, err := strconv.Atoi(check.Parameters[0])
@@ -232,8 +232,6 @@ func NewGt() func(field *Field, check *Check) (IsValid, error) {
 		case reflect.Float64, reflect.Float32:
 			return ret.floatGt, nil
 		case reflect.Slice:
-			return ret.sliceGt, nil
-		case reflect.Ptr:
 			switch field.Elem().Kind() {
 			case reflect.String:
 				return ret.stringGt, nil
@@ -244,12 +242,32 @@ func NewGt() func(field *Field, check *Check) (IsValid, error) {
 			case reflect.Slice:
 				return ret.sliceGt, nil
 			}
+		case reflect.Ptr:
+			switch field.Elem().Kind() {
+			case reflect.String:
+				return ret.stringGt, nil
+			case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+				return ret.intGt, nil
+			case reflect.Float64, reflect.Float32:
+				return ret.floatGt, nil
+			case reflect.Slice:
+				switch field.Elem().Elem().Kind() {
+				case reflect.String:
+					return ret.stringGt, nil
+				case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+					return ret.intGt, nil
+				case reflect.Float64, reflect.Float32:
+					return ret.floatGt, nil
+				case reflect.Slice:
+					return ret.sliceGt, nil
+				}
+			}
 		}
 		return nil, fmt.Errorf("unsupported ge type: %s", field.Type.String())
 	}
 }
 
-//NewLt creates less than validation check
+// NewLt creates less than validation check
 func NewLt() func(field *Field, check *Check) (IsValid, error) {
 	return func(field *Field, check *Check) (IsValid, error) {
 		param, err := strconv.Atoi(check.Parameters[0])
@@ -266,8 +284,6 @@ func NewLt() func(field *Field, check *Check) (IsValid, error) {
 		case reflect.Float64, reflect.Float32:
 			return ret.floatLt, nil
 		case reflect.Slice:
-			return ret.sliceLt, nil
-		case reflect.Ptr:
 			switch field.Elem().Kind() {
 			case reflect.String:
 				return ret.stringLt, nil
@@ -278,12 +294,32 @@ func NewLt() func(field *Field, check *Check) (IsValid, error) {
 			case reflect.Slice:
 				return ret.sliceLt, nil
 			}
+		case reflect.Ptr:
+			switch field.Elem().Kind() {
+			case reflect.String:
+				return ret.stringLt, nil
+			case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+				return ret.intLt, nil
+			case reflect.Float64, reflect.Float32:
+				return ret.floatLt, nil
+			case reflect.Slice:
+				switch field.Elem().Elem().Kind() {
+				case reflect.String:
+					return ret.stringLt, nil
+				case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+					return ret.intLt, nil
+				case reflect.Float64, reflect.Float32:
+					return ret.floatLt, nil
+				case reflect.Slice:
+					return ret.sliceLt, nil
+				}
+			}
 		}
 		return nil, fmt.Errorf("unsupported ge type: %s", field.Type.String())
 	}
 }
 
-//NewGte creates greater or equal than validation check
+// NewGte creates greater or equal than validation check
 func NewGte() func(field *Field, check *Check) (IsValid, error) {
 	return func(field *Field, check *Check) (IsValid, error) {
 		param, err := strconv.Atoi(check.Parameters[0])
@@ -300,8 +336,6 @@ func NewGte() func(field *Field, check *Check) (IsValid, error) {
 		case reflect.Float64, reflect.Float32:
 			return ret.floatGte, nil
 		case reflect.Slice:
-			return ret.sliceGte, nil
-		case reflect.Ptr:
 			switch field.Elem().Kind() {
 			case reflect.String:
 				return ret.stringGte, nil
@@ -312,12 +346,32 @@ func NewGte() func(field *Field, check *Check) (IsValid, error) {
 			case reflect.Slice:
 				return ret.sliceGte, nil
 			}
+		case reflect.Ptr:
+			switch field.Elem().Kind() {
+			case reflect.String:
+				return ret.stringGte, nil
+			case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+				return ret.intGte, nil
+			case reflect.Float64, reflect.Float32:
+				return ret.floatGte, nil
+			case reflect.Slice:
+				switch field.Elem().Elem().Kind() {
+				case reflect.String:
+					return ret.stringGte, nil
+				case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+					return ret.intGte, nil
+				case reflect.Float64, reflect.Float32:
+					return ret.floatGte, nil
+				case reflect.Slice:
+					return ret.sliceGte, nil
+				}
+			}
 		}
 		return nil, fmt.Errorf("unsupported ge type: %s", field.Type.String())
 	}
 }
 
-//NewLte creates less or equal than validation check
+// NewLte creates less or equal than validation check
 func NewLte() func(field *Field, check *Check) (IsValid, error) {
 	return func(field *Field, check *Check) (IsValid, error) {
 		param, err := strconv.Atoi(check.Parameters[0])
@@ -334,8 +388,6 @@ func NewLte() func(field *Field, check *Check) (IsValid, error) {
 		case reflect.Float64, reflect.Float32:
 			return ret.floatLte, nil
 		case reflect.Slice:
-			return ret.sliceLte, nil
-		case reflect.Ptr:
 			switch field.Elem().Kind() {
 			case reflect.String:
 				return ret.stringLte, nil
@@ -345,6 +397,26 @@ func NewLte() func(field *Field, check *Check) (IsValid, error) {
 				return ret.floatLte, nil
 			case reflect.Slice:
 				return ret.sliceLte, nil
+			}
+		case reflect.Ptr:
+			switch field.Elem().Kind() {
+			case reflect.String:
+				return ret.stringLte, nil
+			case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+				return ret.intLte, nil
+			case reflect.Float64, reflect.Float32:
+				return ret.floatLte, nil
+			case reflect.Slice:
+				switch field.Elem().Elem().Kind() {
+				case reflect.String:
+					return ret.stringLte, nil
+				case reflect.Int, reflect.Int64, reflect.Uint, reflect.Uint64, reflect.Int32, reflect.Uint32, reflect.Int16, reflect.Uint16, reflect.Int8, reflect.Uint8:
+					return ret.intLte, nil
+				case reflect.Float64, reflect.Float32:
+					return ret.floatLte, nil
+				case reflect.Slice:
+					return ret.sliceLte, nil
+				}
 			}
 		}
 		return nil, fmt.Errorf("unsupported ge type: %s", field.Type.String())

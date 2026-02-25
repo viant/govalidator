@@ -25,15 +25,23 @@ type (
 
 func (v *Validation) AddViolation(field string, value interface{}, check string, msg string) {
 	path := &Path{Kind: PathKinField, Name: field}
-	v.Append(path, field, value, check, msg)
+	v.Append(path, field, value, check, msg, nil)
 }
 
-func (v *Validation) Append(path *Path, field string, value interface{}, check string, msg string) {
+func (v *Validation) Append(path *Path, field string, value interface{}, check string, msg string, params []string) {
 	value = derefIfNeeded(value)
+	param := strings.Join(params, ",")
+	otherField := inferOtherField(check, params)
 	if msg == "" {
 		msg = fmt.Sprintf("check '%v' failed on field %v", check, field)
 	} else {
-		msg = strings.Replace(msg, "$value", fmt.Sprintf("%v", value), 1)
+		replacer := strings.NewReplacer(
+			"$field", field,
+			"$value", fmt.Sprintf("%v", value),
+			"$param", param,
+			"$otherField", otherField,
+		)
+		msg = replacer.Replace(msg)
 	}
 	v.Violations = append(v.Violations, &Violation{
 		Location: path.String(),
@@ -94,4 +102,14 @@ func derefIfNeeded(value interface{}) interface{} {
 		}
 	}
 	return value
+}
+
+func inferOtherField(check string, params []string) string {
+	switch strings.ToLower(check) {
+	case "eqfield", "nefield", "gtfield", "required_if", "required_unless", "required_with", "required_without":
+		if len(params) > 0 {
+			return params[0]
+		}
+	}
+	return ""
 }

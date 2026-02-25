@@ -1,7 +1,7 @@
 # govalidator (Flexible validator for GoLang)
 
-[![GoReportCard](https://goreportcard.com/badge/github.com/viant/godiff)](https://goreportcard.com/report/github.com/viant/godiff)
-[![GoDoc](https://godoc.org/github.com/viant/godiff?status.svg)](https://godoc.org/github.com/viant/godiff)
+[![GoReportCard](https://goreportcard.com/badge/github.com/viant/govalidator)](https://goreportcard.com/report/github.com/viant/govalidator)
+[![GoDoc](https://godoc.org/github.com/viant/govalidator?status.svg)](https://godoc.org/github.com/viant/govalidator)
 
 This library is compatible with Go 1.17+
 
@@ -45,7 +45,7 @@ validation, err := validator.Validate(someStruct)
 - hexadecimal
 - hexcolor
 - rgb
-- rgb
+- rgba
 - hsl
 - hsla
 - e164
@@ -99,19 +99,81 @@ validation, err := validator.Validate(someStruct)
 - nonwwwDomain
 - gt(N)
 - ge(N)
+- gte(N)
 - lt(N)
 - le(N)
+- lte(N)
+- min(N)
+- max(N)
+- between(min,max)
 - choice(coma separated list of allowed int or string values)
+- oneof(coma separated list of allowed int or string values)
+- contains(text)
+- notcontains(text)
+- startswith(prefix)
+- endswith(suffix)
+- eqfield(OtherField)
+- nefield(OtherField)
+- gtfield(OtherField)
+- required_if(OtherField,value)
+- required_unless(OtherField,value)
+- required_with(OtherField)
+- required_without(OtherField)
+- past
+- future
+- url
+- uri
+- http_url
+- ip
+- ipv4
+- ipv6
+- cidr
+- hostname
+- mac
+- port
+- uuidv7
+- slug
+- semver
+- json
+
+### Validation matrix (tag -> Go kinds -> example)
+
+| Tag | Supported Go kinds | Example |
+|---|---|---|
+| `required` | `string`, `bool`, `int*`, `uint*`, `float*`, `slice`, `ptr`, `time.Time` | ``Name string `validate:"required"` `` |
+| `gt/ge/gte/lt/le/lte` | numbers (`int*`,`uint*`,`float*`), `string` (length), primitive slice elements (`[]int`,`[]string`) | ``Age int `validate:"gte(18),lte(65)"` `` |
+| `min/max/between` | numbers, `string` (length), slice length, primitive slice elements | ``Code string `validate:"between(3,10)"` `` |
+| `choice/oneof` | `string`, `int*`, pointers to them, primitive slice elements | ``State string `validate:"oneof(AZ,AK,CA)"` `` |
+| `contains/notcontains/startswith/endswith` | `string`, `*string`, `[]string` elements | ``Email string `validate:"contains(@),endswith(.com)"` `` |
+| `eqfield/nefield/gtfield` | compares current field to another field in same struct | ``Confirm string `validate:"eqfield(Password)"` `` |
+| `required_if/required_unless` | any field type using emptiness check, based on another field value | ``Phone string `validate:"required_if(Type,mobile)"` `` |
+| `required_with/required_without` | any field type using emptiness check, based on presence/absence of other fields | ``Phone string `validate:"required_without(Email)"` `` |
+| `past/future` | `time.Time`, `*time.Time`, `string`, `*string` (RFC3339/RFC3339Nano/`2006-01-02`) | ``StartAt string `validate:"future"` `` |
+| `url/uri/http_url` | `string`, `*string`, `[]string` elements | ``Link string `validate:"http_url"` `` |
+| `ip/ipv4/ipv6/cidr` | `string`, `*string`, `[]string` elements | ``Network string `validate:"cidr"` `` |
+| `hostname/mac` | `string`, `*string`, `[]string` elements | ``Host string `validate:"hostname"` `` |
+| `port` | `string`, `*string`, `int*`, `uint*`, `[]string` elements | ``Port int `validate:"port"` `` |
+| `uuidv7` | `string`, `*string`, `[]string` elements | ``ID string `validate:"uuidv7"` `` |
+| `slug` | `string`, `*string`, `[]string` elements | ``Slug string `validate:"slug"` `` |
+| `semver` | `string`, `*string`, `[]string` elements | ``Version string `validate:"semver"` `` |
+| `json` | `string`, `*string`, `[]string` elements, `[]byte` | ``Payload string `validate:"json"` `` |
+| Regex family (`email`, `alpha`, `domain`, `uuid4`, etc.) | `string`, `*string` | ``Email string `validate:"email"` `` |
 
 ### Additional tag
 - omitempty
 - skipPath - remove path from location
 - presence - presence field
 
+### Message template placeholders
+- `$field` - current field name
+- `$value` - current field value
+- `$param` - check parameters joined with comma
+- `$otherField` - related field for cross/conditional checks
+
 
 ## Validation option 
 - WithShallow  - shallow check
-- WithPresence - check only field set
+- WithSetMarker - check only fields marked as present
 
 
 ## Contributing to govalidator
@@ -123,4 +185,3 @@ See [TODO](TODO.md) list
 ## Credits and Acknowledgements
 
 **Library Author:** Adrian Witas
-

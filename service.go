@@ -48,13 +48,6 @@ func (s *Service) validate(ctx context.Context, any interface{}, validation *Val
 			return s.validateStruct(ctx, t.Elem(), any, validation, options)
 		case reflect.Slice:
 			return s.validateSlice(ctx, t.Elem(), any, validation, options)
-		case reflect.String:
-			actual := any.([]string)
-			for _, value := range actual {
-				if err := s.validate(ctx, value, validation, options); err != nil {
-					return err
-				}
-			}
 		}
 	case reflect.Struct:
 		return s.validateStruct(ctx, t, any, validation, options)
@@ -257,7 +250,7 @@ func (s *Service) checkValue(ctx context.Context, field *FieldCheck, fieldValue 
 					fieldValue = deref(fieldValue)
 				}
 			}
-			validation.Append(fieldPath, field.Field.Name, fieldValue, field.Checks[i].Name, field.Checks[i].Message)
+			validation.Append(fieldPath, field.Field.Name, fieldValue, field.Checks[i].Name, field.Checks[i].Message, field.Checks[i].Parameters)
 			break
 		}
 	}
